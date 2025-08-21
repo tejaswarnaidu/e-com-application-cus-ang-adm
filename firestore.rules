@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can read and write their own data
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Orders: Users can read and write their own orders
+    match /orders/{orderId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.userId;
+    }
+    
+    // Notifications: Users can read their own notifications
+    match /notifications/{notificationId} {
+      allow read: if request.auth != null && 
+        request.auth.uid == resource.data.userId;
+      allow write: if request.auth != null && 
+        request.auth.uid == request.resource.data.userId;
+    }
+    
+    // Products: Read-only for all authenticated users
+    match /products/{productId} {
+      allow read: if request.auth != null;
+    }
+    
+    // Categories: Read-only for all authenticated users
+    match /categories/{categoryId} {
+      allow read: if request.auth != null;
+    }
+    
+    // Coupons: Read-only for all authenticated users
+    match /coupons/{couponId} {
+      allow read: if request.auth != null;
+    }
+    
+    // Topic notifications: Admin write, all read
+    match /topicNotifications/{notificationId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // Email queue: Write-only for authenticated users
+    match /emailQueue/{emailId} {
+      allow write: if request.auth != null;
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
